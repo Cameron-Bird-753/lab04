@@ -16,10 +16,10 @@
         <h2>Edit Note</h2>
         <form method="post">
             <label>Title</label>
-            <input type="text" name="note_title"> 
+            <input type="text" name="note_title" value="${note.title}"> 
             <br>
             <label>Content</label>
-            <textarea rows = "5" cols = "20" name = "note_content" placeholder="Enter information"></textarea>
+            <textarea rows = "5" cols = "20" name ="note_content" >${note.content}</textarea>
             <br>
             <input type = "submit" value = "Save" />
         </form>

@@ -20,50 +20,74 @@ import models.Note;
  */
 public class NoteServlet extends HttpServlet {
 
+    private Note userNote;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("DO GET ");
+        String edit = request.getParameter("edit"); 
         String title;
         String content;
-        ArrayList filedata = new ArrayList<>();
+        ArrayList<String> filedata = new ArrayList<>();
         String path = getServletContext().getRealPath("/WEB-INF/note.txt");
-        // to read files
         BufferedReader br = new BufferedReader(new FileReader(new File(path)));
-        try{
-            String line;
-            while (br.readLine() != null) {
-                
-                line = br.readLine();
-                filedata.add(line);
-                System.out.println("FIND THIS "+ line);
-            }   
-//            title = (String) filedata.get(0);
-//            content = (String) filedata.get(1);
-//            Note userNote = new Note(title, content);
-//            request.setAttribute("title", userNote);
-//            request.setAttribute("content", userNote);
-        }catch(IOException e) {
-            e.printStackTrace();
-       }
-// to write to a file
-//        PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path, false))); 
-  
-        
-        String edit = request.getParameter("edit"); 
+        if (userNote == null){
+            System.out.println("IT IS NULL");
+            try{
+
+                String line;
+                while (br.ready()) {
+                    line = br.readLine();
+                    filedata.add(line);
+                    System.out.println("This line " + line);
+                } 
+                System.out.println("filedata "+ filedata.size());
+                if(filedata.size()>1){
+                    title = (String) filedata.get(0);
+                    content = (String) filedata.get(1);
+                    userNote = new Note(title, content);
+                    request.setAttribute("note", userNote);
+                }
+
+            }catch(IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            request.setAttribute("note", userNote);
+            
+        }
+ 
         if(edit != null){
             getServletContext().getRequestDispatcher("/WEB-INF/editnote.jsp").forward(request,response);
+            request.setAttribute("note_title", userNote);
+            request.setAttribute("note_content", userNote);
         }
         getServletContext().getRequestDispatcher("/WEB-INF/viewnote.jsp").forward(request,response);
-        
     }
 
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-   
+        String title = request.getParameter("note_title");
+        String content= request.getParameter("note_content");
+        System.out.println("New Title "+ title);
+        System.out.println("New Content "+ content);
+        if(userNote != null){
+            userNote.setTitle(title);
+            userNote.setContent(content);
+            request.setAttribute("note", userNote);
+            System.out.println("New Title of Nopte object"+ userNote.getTitle());
+            try{
+            String path = getServletContext().getRealPath("/WEB-INF/note.txt");
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path, false))); 
+            pw.println(title);
+            pw.println(content);
+            
+            getServletContext().getRequestDispatcher("/WEB-INF/viewnote.jsp").forward(request,response);
+            }catch(IOException e) {
+                e.printStackTrace();
+           }
+        }
     }
-
 }
